@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>BURKAB — Operatör Tablet</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #0d0d0d;
+  --navy2:  #1a1a1a;
+  --navy3:  #222;
+  --border: #2e2e2e;
+  --accent: #f5c400;
+  --accent2:#ffd700;
+  --bg:     #f4f2ec;
+  --bg2:    #eae7dd;
+  --white:  #ffffff;
+  --text:   #1a1a1a;
+  --muted:  #707060;
+  --ok:     #00875a;
+  --warn:   #e65100;
+  --danger: #c62828;
+  --blue:   #0277bd;
+  --purple: #6a1b9a;
+  --card-r: 14px;
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body { font-family:'IBM Plex Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* ── HEADER ── */
+.header {
+  background:var(--navy);
+  color:#fff;
+  padding:0 20px;
+  position:sticky; top:0; z-index:300;
+  box-shadow:0 3px 20px rgba(0,0,0,.45);
+  display:flex; align-items:center; justify-content:space-between;
+  height:64px; gap:12px;
+}
+.brand { display:flex; align-items:center; gap:10px; }
+.brand-logo { background:var(--accent); color:var(--navy); font-weight:900; font-size:13px; letter-spacing:1.5px; padding:5px 10px; border-radius:5px; }
+.brand-sub { font-size:10px; color:#666; letter-spacing:1.5px; text-transform:uppercase; }
+.header-right { display:flex; align-items:center; gap:14px; }
+.clock { font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--accent); font-weight:600; }
+
+/* ── QR SPLASH ── */
+#qr-splash {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:calc(100vh - 64px);
+  gap:28px;
+  background: radial-gradient(ellipse at 50% 40%, #1a1a1a 0%, #0d0d0d 100%);
+  color:#fff;
+  padding:32px 20px;
+}
+.qr-icon {
+  width:120px; height:120px;
+  border:3px solid var(--accent);
+  border-radius:18px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:60px;
+  background:rgba(245,196,0,.08);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(245,196,0,.3)} 50%{box-shadow:0 0 0 18px rgba(245,196,0,0)} }
+.qr-splash-title { font-size:22px; font-weight:700; letter-spacing:1px; }
+.qr-splash-sub { font-size:13px; color:#888; letter-spacing:1px; text-align:center; }
+.demo-btns { display:flex; flex-direction:column; gap:10px; width:100%; max-width:380px; }
+.demo-btn {
+  background:rgba(245,196,0,.1);
+  border:1.5px solid rgba(245,196,0,.3);
+  border-radius:10px;
+  color:#fff;
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:14px; font-weight:600;
+  padding:16px 20px;
+  cursor:pointer;
+  display:flex; align-items:center; gap:14px;
+  transition:all .2s;
+}
+.demo-btn:hover { background:rgba(245,196,0,.2); border-color:var(--accent); transform:translateY(-1px); }
+.demo-btn .demo-icon { font-size:22px; }
+.demo-btn .demo-info { text-align:left; }
+.demo-btn .demo-name { font-size:15px; font-weight:700; }
+.demo-btn .demo-code { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent); }
+
+/* ── EKİPMAN PANEL ── */
+#ekipman-panel { display:none; }
+
+.eq-header {
+  background:var(--navy);
+  color:#fff;
+  padding:16px 20px;
+  display:flex; align-items:center; gap:14px;
+  border-bottom:2px solid var(--accent);
+}
+.eq-back {
+  background:rgba(255,255,255,.1);
+  border:none; border-radius:8px;
+  color:#fff; font-size:18px;
+  width:40px; height:40px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0;
+  transition:background .15s;
+}
+.eq-back:hover { background:rgba(255,255,255,.2); }
+.eq-info { flex:1; }
+.eq-name { font-size:18px; font-weight:700; }
+.eq-meta { font-size:11px; color:#aaa; letter-spacing:.8px; margin-top:2px; font-family:'IBM Plex Mono',monospace; }
+.eq-status {
+  padding:5px 12px; border-radius:20px;
+  font-size:11px; font-weight:700; letter-spacing:.5px;
+  flex-shrink:0;
+}
+.eq-status.aktif { background:rgba(0,135,90,.25); color:#4cdb9d; border:1px solid rgba(0,135,90,.4); }
+.eq-status.arizali { background:rgba(198,40,40,.25); color:#ff6b6b; border:1px solid rgba(198,40,40,.4); }
+.eq-status.bakimda { background:rgba(245,196,0,.2); color:#ffd700; border:1px solid rgba(245,196,0,.35); }
+
+/* ── TABS ── */
+.tab-bar {
+  background:var(--navy2);
+  display:flex;
+  border-bottom:2px solid var(--border);
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.tab-bar::-webkit-scrollbar { display:none; }
+.tab-btn {
+  flex:1; min-width:0;
+  padding:13px 8px;
+  border:none; background:transparent;
+  color:rgba(255,255,255,.4);
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:12px; font-weight:700; letter-spacing:.5px;
+  cursor:pointer;
+  border-bottom:3px solid transparent; margin-bottom:-2px;
+  transition:all .2s;
+  white-space:nowrap;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+.tab-btn .tab-ico { font-size:18px; }
+.tab-btn:hover { color:rgba(255,255,255,.7); }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* ── CONTENT ── */
+.tab-content { display:none; padding:16px 16px 80px; max-width:740px; margin:0 auto; }
+.tab-content.active { display:block; }
+
+/* ── CARD ── */
+.card {
+  background:var(--white);
+  border:1px solid #d8d2c8;
+  border-radius:var(--card-r);
+  margin-bottom:14px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.card-head {
+  background:linear-gradient(90deg, var(--navy2), var(--navy3));
+  color:#fff;
+  padding:10px 16px;
+  display:flex; align-items:center; gap:10px;
+  font-size:12px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+}
+.card-head .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+.card-body { padding:14px 16px; }
+
+/* ── EKİPMAN BİLGİ GRID ── */
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media(max-width:480px) { .info-grid { grid-template-columns:1fr; } }
+.info-item label { display:block; font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.8px; text-transform:uppercase; margin-bottom:3px; }
+.info-item span { font-size:14px; font-weight:600; }
+.info-item span.mono { font-family:'IBM Plex Mono',monospace; font-size:13px; color:#c07800; }
+
+/* ── CHECKLİST ── */
+.period-tabs { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.period-tab {
+  padding:7px 16px; border-radius:20px;
+  border:1.5px solid #d0ccc0;
+  background:var(--bg);
+  font-size:12px; font-weight:700; color:var(--muted);
+  cursor:pointer; transition:all .15s; letter-spacing:.5px;
+}
+.period-tab.active { background:var(--accent); border-color:var(--accent); color:var(--navy); }
+
+.checklist { display:flex; flex-direction:column; gap:8px; }
+.check-item {
+  display:flex; align-items:flex-start; gap:12px;
+  background:var(--bg);
+  border:1.5px solid #d8d2c8;
+  border-radius:10px;
+  padding:12px 14px;
+  cursor:pointer;
+  transition:all .18s;
+  user-select:none;
+}
+.check-item:active { transform:scale(.99); }
+.check-item.checked { background:#e8f7ef; border-color:#a0d9bc; }
+.check-item.warn-item { background:#fff8e1; border-color:#ffcc02; }
+.check-item.warn-item.checked { background:#e8f7ef; border-color:#a0d9bc; }
+.check-box {
+  width:26px; height:26px; border-radius:6px;
+  border:2px solid #b0a890;
+  background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; font-size:15px;
+  transition:all .15s;
+}
+.check-item.checked .check-box { background:var(--ok); border-color:var(--ok); color:#fff; }
+.check-text { flex:1; }
+.check-title { font-size:14px; font-weight:600; line-height:1.3; }
+.check-desc { font-size:12px; color:var(--muted); margin-top:2px; }
+.check-warn { font-size:11px; color:var(--warn); font-weight:600; margin-top:3px; }
+
+.checklist-progress { margin-bottom:14px; }
+.progress-bar-wrap { height:8px; background:#d8d2c8; border-radius:4px; overflow:hidden; }
+.progress-bar-fill { height:100%; background:var(--ok); border-radius:4px; transition:width .4s ease; }
+.progress-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:4px; font-weight:600; }
+
+.btn-tamamla {
+  width:100%; background:var(--ok); color:#fff;
+  border:none; border-radius:10px;
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:16px; font-weight:700; letter-spacing:.5px;
+  padding:16px; cursor:pointer;
+  margin-top:10px;
+  transition:all .18s;
+  box-shadow:0 4px 14px rgba(0,135,90,.3);
+}
+.btn-tamamla:hover { background:#00a06c; transform:translateY(-1px); }
+.btn-tamamla:disabled { background:#aaa; box-shadow:none; cursor:not-allowed; transform:none; }
+
+/* ── ARIZA BİLDİRİMİ ── */
+.field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+.field label { font-size:11px; font-weight:700; letter-spacing:.8px; color:var(--muted); text-transform:uppercase; }
+.field label .req { color:var(--danger); margin-left:2px; }
+
+input, select, textarea {
+  background:var(--bg);
+  border:1.5px solid #c8c0b0;
+  border-radius:8px;
+  color:var(--text);
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:15px;
+  padding:12px 14px;
+  width:100%; outline:none;
+  transition:border .15s, box-shadow .15s;
+  -webkit-appearance:none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color:var(--accent);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(245,196,0,.18);
+}
+textarea { resize:vertical; min-height:90px; }
+select {
+  cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23707060' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center; padding-right:38px;
+}
+
+.oncelik-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:4px; }
+.onc-btn {
+  border:2px solid #d0ccc0;
+  border-radius:8px;
+  background:var(--bg);
+  padding:10px 8px;
+  text-align:center; cursor:pointer;
+  transition:all .15s; user-select:none;
+}
+.onc-icon { font-size:22px; margin-bottom:3px; }
+.onc-label { font-size:11px; font-weight:700; color:var(--muted); }
+.onc-btn.selected-dusuk { border-color:var(--ok); background:#e8f7ef; }
+.onc-btn.selected-dusuk .onc-label { color:var(--ok); }
+.onc-btn.selected-orta { border-color:var(--warn); background:#fff3e0; }
+.onc-btn.selected-orta .onc-label { color:var(--warn); }
+.onc-btn.selected-yuksek { border-color:var(--danger); background:#fde8e8; }
+.onc-btn.selected-yuksek .onc-label { color:var(--danger); }
+
+.foto-area {
+  border:2px dashed #c8c0b0;
+  border-radius:10px;
+  padding:20px;
+  text-align:center;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s;
+  background:var(--bg);
+}
+.foto-area:hover { border-color:var(--accent); background:#fffae0; }
+.foto-area .foto-icon { font-size:32px; margin-bottom:8px; }
+.foto-area .foto-text { font-size:13px; font-weight:600; }
+.foto-area .foto-sub { font-size:11px; margin-top:3px; opacity:.7; }
+.foto-preview { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.foto-thumb {
+  width:70px; height:70px; border-radius:8px;
+  object-fit:cover; border:2px solid #d8d2c8;
+}
+
+.btn-bildir {
+  width:100%; background:var(--danger); color:#fff;
+  border:none; border-radius:10px;
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:16px; font-weight:700; letter-spacing:.5px;
+  padding:16px; cursor:pointer;
+  margin-top:4px;
+  transition:all .18s;
+  box-shadow:0 4px 14px rgba(198,40,40,.3);
+}
+.btn-bildir:hover { background:#e53935; transform:translateY(-1px); }
+
+/* ── BAKIMI GEÇMİŞİ ── */
+.gecmis-filter { display:flex; gap:8px; margin-bottom:14px; }
+.gecmis-filter input, .gecmis-filter select { font-size:13px; padding:9px 12px; }
+
+.gecmis-item {
+  background:var(--white);
+  border:1px solid #d8d2c8;
+  border-radius:10px;
+  padding:14px 16px;
+  margin-bottom:10px;
+  border-left:4px solid #d0ccc0;
+  transition:all .15s;
+}
+.gecmis-item:hover { box-shadow:0 3px 12px rgba(0,0,0,.08); }
+.gecmis-item.tip-ariza { border-left-color:var(--danger); }
+.gecmis-item.tip-bakim { border-left-color:var(--ok); }
+.gecmis-item.tip-revizyon { border-left-color:var(--purple); }
+.gecmis-item.tip-montaj { border-left-color:var(--warn); }
+.gecmis-item.tip-planli { border-left-color:var(--blue); }
+
+.gecmis-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:8px; }
+.gecmis-tarih { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); }
+.badge { display:inline-block; padding:3px 9px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:.5px; }
+.b-ariza    { background:#fde8e8; color:var(--danger); }
+.b-bakim    { background:#e3f7ee; color:var(--ok); }
+.b-revizyon { background:#f3e5f5; color:var(--purple); }
+.b-montaj   { background:#fff3e0; color:var(--warn); }
+.b-planli   { background:#e3f2fd; color:var(--blue); }
+
+.gecmis-aciklama { font-size:14px; font-weight:600; margin-bottom:6px; }
+.gecmis-detail { display:flex; flex-wrap:wrap; gap:12px; font-size:12px; color:var(--muted); }
+.gecmis-detail span { display:flex; align-items:center; gap:4px; }
+
+.gecmis-expand { display:none; margin-top:10px; padding-top:10px; border-top:1px solid #e8e3d8; }
+.gecmis-expand.open { display:block; }
+.parca-table { width:100%; border-collapse:collapse; font-size:13px; }
+.parca-table th { background:#f4f2ec; padding:7px 10px; text-align:left; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.5px; }
+.parca-table td { padding:7px 10px; border-bottom:1px solid #eee; }
+.expand-btn {
+  background:none; border:1px solid #d0ccc0; border-radius:6px;
+  font-size:12px; color:var(--muted); padding:4px 10px; cursor:pointer;
+  margin-top:8px; font-family:'IBM Plex Sans',sans-serif; font-weight:600;
+  transition:all .15s;
+}
+.expand-btn:hover { border-color:var(--accent); color:var(--text); }
+
+/* ── YEDEK PARÇA ── */
+.yp-search { margin-bottom:12px; }
+.yp-item {
+  background:var(--white);
+  border:1px solid #d8d2c8;
+  border-radius:10px;
+  padding:13px 16px;
+  margin-bottom:9px;
+  display:flex; align-items:center; gap:14px;
+  transition:all .15s;
+}
+.yp-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.07); }
+.yp-ikon { font-size:26px; flex-shrink:0; }
+.yp-info { flex:1; }
+.yp-name { font-size:14px; font-weight:700; }
+.yp-kod { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:1px; }
+.yp-meta { font-size:12px; color:var(--muted); margin-top:3px; }
+.yp-stok { text-align:right; flex-shrink:0; }
+.yp-adet { font-size:20px; font-weight:800; font-family:'IBM Plex Mono',monospace; }
+.yp-adet.ok { color:var(--ok); }
+.yp-adet.warn { color:var(--warn); }
+.yp-adet.out { color:var(--danger); }
+.yp-stok-label { font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.5px; text-align:right; }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:20px; right:16px;
+  background:var(--navy); color:#fff;
+  border-left:4px solid var(--accent);
+  border-radius:9px; padding:13px 18px;
+  font-size:14px; font-weight:600;
+  box-shadow:0 6px 24px rgba(0,0,0,.28);
+  transform:translateY(80px); opacity:0;
+  transition:all .3s; z-index:999; max-width:300px;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.ok   { border-left-color:var(--ok); }
+.toast.err  { border-left-color:var(--danger); }
+
+/* ── BOTTOM STICKY AREA ── */
+.sticky-btn-area {
+  position:fixed; bottom:0; left:0; right:0;
+  background:rgba(244,242,236,.95); backdrop-filter:blur(8px);
+  padding:10px 16px 16px;
+  border-top:1px solid #d8d2c8;
+  z-index:100;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <div class="brand-logo">BURKAB</div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#fff;letter-spacing:.5px;">Bakım Yönetim</div>
+      <div class="brand-sub">Operatör Tablet</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div>
+      <div class="clock" id="clock">00:00:00</div>
+      <div style="font-size:10px;color:#555;text-align:right;" id="date-str">--</div>
+    </div>
+  </div>
+</div>
+
+<!-- QR SPLASH -->
+<div id="qr-splash">
+  <div class="qr-icon">📷</div>
+  <div style="text-align:center">
+    <div class="qr-splash-title">QR Kodu Okutun</div>
+    <div class="qr-splash-sub" style="margin-top:6px">Ekipman kartındaki QR kodu okutarak<br>bakım işlemlerine başlayın</div>
+  </div>
+  <div style="width:100%;max-width:380px;border-top:1px solid #333;padding-top:20px;">
+    <div style="font-size:11px;color:#555;letter-spacing:1px;text-align:center;margin-bottom:12px;text-transform:uppercase;">Demo — Ekipman Seçin</div>
+    <div class="demo-btns">
+      <button class="demo-btn" onclick="qrOku('CNC-001')">
+        <span class="demo-icon">⚙️</span>
+        <div class="demo-info">
+          <div class="demo-name">CNC Torna Tezgahı</div>
+          <div class="demo-code">BRK-CNC-001 · Üretim Hattı A</div>
+        </div>
+      </button>
+      <button class="demo-btn" onclick="qrOku('HYD-042')">
+        <span class="demo-icon">🔧</span>
+        <div class="demo-info">
+          <div class="demo-name">Hidrolik Pres</div>
+          <div class="demo-code">BRK-HYD-042 · Pres Bölümü</div>
+        </div>
+      </button>
+      <button class="demo-btn" onclick="qrOku('KOM-017')">
+        <span class="demo-icon">💨</span>
+        <div class="demo-info">
+          <div class="demo-name">Kompresör Ünitesi</div>
+          <div class="demo-code">BRK-KOM-017 · Makine Parkı</div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- EKİPMAN PANELİ -->
+<div id="ekipman-panel">
+
+  <!-- Ekipman Başlık -->
+  <div class="eq-header">
+    <button class="eq-back" onclick="geriDon()">←</button>
+    <div class="eq-info">
+      <div class="eq-name" id="ep-name">—</div>
+      <div class="eq-meta" id="ep-meta">—</div>
+    </div>
+    <div class="eq-status aktif" id="ep-status">AKTİF</div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="goTab('checklist')" id="tab-checklist">
+      <span class="tab-ico">✅</span>KONTROL
+    </button>
+    <button class="tab-btn" onclick="goTab('ariza')" id="tab-ariza">
+      <span class="tab-ico">🚨</span>ARIZA
+    </button>
+    <button class="tab-btn" onclick="goTab('gecmis')" id="tab-gecmis">
+      <span class="tab-ico">📋</span>GEÇMİŞ
+    </button>
+    <button class="tab-btn" onclick="goTab('parcalar')" id="tab-parcalar">
+      <span class="tab-ico">🔩</span>PARÇALAR
+    </button>
+  </div>
+
+  <!-- ────────── KONTROL LİSTESİ ────────── -->
+  <div class="tab-content active" id="content-checklist">
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>PERİYOT SEÇİN</div>
+      <div class="card-body">
+        <div class="period-tabs">
+          <button class="period-tab active" onclick="periyotSec(this,'gunluk')">Günlük</button>
+          <button class="period-tab" onclick="periyotSec(this,'haftalik')">Haftalık</button>
+          <button class="period-tab" onclick="periyotSec(this,'aylik')">Aylık</button>
+          <button class="period-tab" onclick="periyotSec(this,'is_emri')">İş Emri</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span><span id="checklist-baslik">GÜNLÜK KONTROLLER</span></div>
+      <div class="card-body">
+        <div class="checklist-progress">
+          <div class="progress-label">
+            <span id="progress-text">0 / 0 tamamlandı</span>
+            <span id="progress-pct">%0</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="checklist" id="checklist-items">
+          <!-- JS ile doldurulur -->
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:0 0 4px;">
+      <button class="btn-tamamla" id="btn-tamamla" onclick="checklistTamamla()">
+        ✅ Kontrolü Tamamla ve Kaydet
+      </button>
+    </div>
+  </div>
+
+  <!-- ────────── ARIZA BİLDİRİMİ ────────── -->
+  <div class="tab-content" id="content-ariza">
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>ARIZA BİLDİRİM FORMU</div>
+      <div class="card-body">
+
+        <div class="field">
+          <label>Arıza Türü <span class="req">*</span></label>
+          <select id="ar-tur">
+            <option value="">— Seçin —</option>
+            <option>Mekanik Arıza</option>
+            <option>Elektrik Arıza</option>
+            <option>Hidrolik / Pnömatik</option>
+            <option>Elektronik / Kontrol</option>
+            <option>Yağlama / Soğutma</option>
+            <option>Titreşim / Gürültü</option>
+            <option>Diğer</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Öncelik <span class="req">*</span></label>
+          <div class="oncelik-grid">
+            <div class="onc-btn" onclick="oncelikSec(this,'dusuk')">
+              <div class="onc-icon">🟢</div>
+              <div class="onc-label">DÜŞÜK</div>
+            </div>
+            <div class="onc-btn" onclick="oncelikSec(this,'orta')">
+              <div class="onc-icon">🟡</div>
+              <div class="onc-label">ORTA</div>
+            </div>
+            <div class="onc-btn" onclick="oncelikSec(this,'yuksek')">
+              <div class="onc-icon">🔴</div>
+              <div class="onc-label">YÜKSEK</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Arıza Açıklaması <span class="req">*</span></label>
+          <textarea id="ar-aciklama" placeholder="Arızanın ne zaman başladığını, nasıl bir belirti verdiğini, üretimi etkileyip etkilemediğini yazın..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Bildiren Operatör <span class="req">*</span></label>
+          <input type="text" id="ar-operator" placeholder="Ad Soyad">
+        </div>
+
+        <div class="field">
+          <label>Fotoğraf / Video Ekle</label>
+          <div class="foto-area" onclick="document.getElementById('foto-input').click()">
+            <div class="foto-icon">📸</div>
+            <div class="foto-text">Fotoğraf Ekle</div>
+            <div class="foto-sub">Arıza noktasının fotoğrafını çekin</div>
+          </div>
+          <input type="file" id="foto-input" accept="image/*" multiple capture="environment" style="display:none" onchange="fotoEkle(this)">
+          <div class="foto-preview" id="foto-preview"></div>
+        </div>
+
+        <div class="field">
+          <label>Ek Notlar</label>
+          <textarea id="ar-notlar" placeholder="Varsa ek bilgi, son bakım tarihi, vs..." style="min-height:60px;"></textarea>
+        </div>
+
+        <button class="btn-bildir" onclick="arizaBildir()">
+          🚨 Arızayı Bildir ve İş Emri Oluştur
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ────────── BAKIM GEÇMİŞİ ────────── -->
+  <div class="tab-content" id="content-gecmis">
+    <div class="gecmis-filter">
+      <input type="text" placeholder="🔍 Ara..." id="gecmis-ara" oninput="gecmisFiltrele()">
+      <select id="gecmis-tip" onchange="gecmisFiltrele()" style="min-width:130px">
+        <option value="">Tümü</option>
+        <option value="Bakım">Bakım</option>
+        <option value="Arıza">Arıza</option>
+        <option value="Revizyon">Revizyon</option>
+        <option value="Montaj">Montaj</option>
+        <option value="Planlı">Planlı</option>
+      </select>
+    </div>
+    <div id="gecmis-list"></div>
+  </div>
+
+  <!-- ────────── YEDEK PARÇALAR ────────── -->
+  <div class="tab-content" id="content-parcalar">
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>BAĞLI YEDEK PARÇALAR</div>
+      <div class="card-body" style="padding-bottom:6px;">
+        <div class="yp-search">
+          <input type="text" placeholder="🔍 Parça adı veya kodu ile ara..." id="yp-ara" oninput="ypFiltrele()">
+        </div>
+        <div id="yp-list"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /ekipman-panel -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SAAT ──────────────────────────────────────
+const goster = ()=>{
+  const n=new Date();
+  document.getElementById('clock').textContent=n.toLocaleTimeString('tr-TR');
+  document.getElementById('date-str').textContent=n.toLocaleDateString('tr-TR',{weekday:'short',day:'2-digit',month:'short'});
+};
+goster(); setInterval(goster,1000);
+
+// ── DATA ──────────────────────────────────────
+const EKIPMANLAR = {
+  'CNC-001': {
+    ad:'CNC Torna Tezgahı', barkod:'BRK-CNC-001', bolum:'Üretim Hattı A',
+    tur:'CNC Tezgah', marka:'Fanuc / DMG Mori', serino:'DMG-2019-04471',
+    devreye:'12.03.2019', garanti:'12.03.2022', durum:'AKTİF', kapasite:'18.5 kW',
+    periyot:'30 gün', konum:'Hat A - İstasyon 3', sorumlubakimci:'Mehmet Kaya'
+  },
+  'HYD-042': {
+    ad:'Hidrolik Pres', barkod:'BRK-HYD-042', bolum:'Pres Bölümü',
+    tur:'Hidrolik Pres', marka:'Bosch Rexroth', serino:'BRT-HYD-7720',
+    devreye:'05.07.2021', garanti:'05.07.2024', durum:'BAKIMDA', kapasite:'250 ton',
+    periyot:'14 gün', konum:'Pres Sahası B-12', sorumlubakimci:'Ali Demir'
+  },
+  'KOM-017': {
+    ad:'Kompresör Ünitesi', barkod:'BRK-KOM-017', bolum:'Makine Parkı',
+    tur:'Vida Kompresör', marka:'Atlas Copco GA-37', serino:'AC-GA37-20210892',
+    devreye:'20.01.2020', garanti:'20.01.2023', durum:'AKTİF', kapasite:'37 kW / 7 bar',
+    periyot:'7 gün', konum:'Makine Dairesi K-2', sorumlubakimci:'Hasan Yıldız'
+  }
+};
+
+const CHECKLISTS = {
+  gunluk: [
+    { id:'g1', baslik:'Yağ seviyesi kontrolü', aciklama:'Min-Max çizgilerini kontrol et', uyari:'Düşükse doldurmadan önce usta onayı al' },
+    { id:'g2', baslik:'Soğutma suyu kontrolü', aciklama:'Rezervuarda su seviyesini kontrol et', uyari:'' },
+    { id:'g3', baslik:'Görsel güvenlik kontrolü', aciklama:'Koruyucular, kapaklar, uyarı levhaları', uyari:'Eksik varsa bildirin' },
+    { id:'g4', baslik:'Titreşim / gürültü dinleme', aciklama:'Normal dışı ses veya titreşim var mı?', uyari:'' },
+    { id:'g5', baslik:'Temizlik kontrolü', aciklama:'Talaş, yağ sızıntısı, pislik var mı?', uyari:'' },
+    { id:'g6', baslik:'Acil stop testi', aciklama:'E-stop butonunun çalışmasını kontrol et', uyari:'Test sırasında makine stop pozisyonunda olmalı' },
+  ],
+  haftalik: [
+    { id:'h1', baslik:'Filtre temizliği', aciklama:'Hava ve yağ filtrelerini kontrol et, temizle', uyari:'Kirli filtreler verimliği düşürür' },
+    { id:'h2', baslik:'Kayış-kasnak kontrolü', aciklama:'Gerilim ve aşınma durumunu kontrol et', uyari:'' },
+    { id:'h3', baslik:'Hidrolik hortum kontrolü', aciklama:'Sızıntı ve kırılma belirtisi var mı?', uyari:'Sızıntı varsa ÜRETİMİ DURDUR' },
+    { id:'h4', baslik:'Bağlantı elemanları kontrolü', aciklama:'Cıvata ve vidaların sıkılığını kontrol et', uyari:'' },
+    { id:'h5', baslik:'Şanzıman yağı kontrolü', aciklama:'Şanzıman yağ seviyesi ve rengi', uyari:'' },
+  ],
+  aylik: [
+    { id:'a1', baslik:'Rulman yağlama', aciklama:'Belirlenen yağlama noktalarını gresle', uyari:'Aşırı doldurma yapma' },
+    { id:'a2', baslik:'Elektrik bağlantı kontrolü', aciklama:'Gevşek kablo veya yakma belirtisi var mı?', uyari:'Elektrik panosu yetkisiz açılmasın' },
+    { id:'a3', baslik:'Yağ değişimi kontrolü', aciklama:'Yağ değişim zamanı gelmiş mi kontrol et', uyari:'' },
+    { id:'a4', baslik:'Kalibrasyon kontrolü', aciklama:'Ölçüm aletleri ve göstergelerin doğruluğu', uyari:'Sapma varsa teknik ofisi bilgilendir' },
+    { id:'a5', baslik:'Güvenlik kilitleme testi', aciklama:'Tüm interlock ve kilitleme sistemleri', uyari:'Yetersiz güvenlik — üretime alma!' },
+    { id:'a6', baslik:'Toplam çalışma saati kaydı', aciklama:'Sayaç değerini sisteme gir', uyari:'' },
+  ],
+  is_emri: [
+    { id:'ie1', baslik:'İş emri numarasını kontrol et', aciklama:'Atanan iş emri numarası ile kart eşleşiyor mu?', uyari:'' },
+    { id:'ie2', baslik:'Gerekli malzeme hazır mı?', aciklama:'Yedek parça ve sarf malzeme listesini kontrol et', uyari:'' },
+    { id:'ie3', baslik:'LOTO uygulandı mı?', aciklama:'Lockout/Tagout prosedürü uygulandı', uyari:'LOTO olmadan çalışma başlatma!' },
+    { id:'ie4', baslik:'Bakım yapıldı', aciklama:'İş emrinde belirtilen bakım tamamlandı', uyari:'' },
+    { id:'ie5', baslik:'Test ve devreye alma', aciklama:'Bakım sonrası makine test edildi', uyari:'' },
+    { id:'ie6', baslik:'Temizlik ve toparlama', aciklama:'Çalışma alanı temizlendi, malzemeler kaldırıldı', uyari:'' },
+  ]
+};
+
+const GECMIS_DATA = {
+  'CNC-001': [
+    { tarih:'14.03.2025', tip:'Bakım', aciklama:'Periyodik aylık bakım tamamlandı', teknisyen:'Mehmet Kaya', sure:'2s 15dk', parcalar:[{kod:'YG-001',ad:'Spindle Yağı 5W-30',adet:2,birim:'Lt'},{kod:'FL-007',ad:'Yağ Filtresi',adet:1,birim:'Adet'}], foto:false },
+    { tarih:'22.02.2025', tip:'Arıza', aciklama:'X ekseni step motor titreşim arızası — motor değiştirildi', teknisyen:'Ali Demir', sure:'4s 30dk', parcalar:[{kod:'MT-X44',ad:'X Ekseni Step Motor',adet:1,birim:'Adet'},{kod:'KPN-03',ad:'Motor Kaplini',adet:1,birim:'Adet'}], foto:true },
+    { tarih:'10.02.2025', tip:'Planlı', aciklama:'Yıllık genel bakım ve kalibrasyon', teknisyen:'Mehmet Kaya', sure:'8s', parcalar:[{kod:'YG-001',ad:'Spindle Yağı',adet:4,birim:'Lt'},{kod:'FL-007',ad:'Yağ Filtresi',adet:2,birim:'Adet'},{kod:'KYS-12',ad:'Soğutma Suyu',adet:10,birim:'Lt'}], foto:true },
+    { tarih:'05.01.2025', tip:'Bakım', aciklama:'Haftalık kontrol ve yağlama yapıldı', teknisyen:'Hasan Yıldız', sure:'45dk', parcalar:[], foto:false },
+  ],
+  'HYD-042': [
+    { tarih:'18.03.2025', tip:'Bakım', aciklama:'Hidrolik yağ değişimi ve filtre temizliği', teknisyen:'Ali Demir', sure:'3s', parcalar:[{kod:'HY-OIL-46',ad:'Hidrolik Yağ 46',adet:20,birim:'Lt'},{kod:'HY-FLT-02',ad:'Hidrolik Filtre',adet:2,birim:'Adet'}], foto:false },
+    { tarih:'28.02.2025', tip:'Arıza', aciklama:'Yüksek basınç hortumu patladı — sistem durduruldu', teknisyen:'Ali Demir', sure:'1s 45dk', parcalar:[{kod:'HR-HP-16',ad:'HP Hortum 16mm',adet:2,birim:'Metre'},{kod:'RK-2P',ad:'Rakor 2\'\'',adet:4,birim:'Adet'}], foto:true },
+  ],
+  'KOM-017': [
+    { tarih:'20.03.2025', tip:'Bakım', aciklama:'Hava filtresi değişimi, yağlama noktaları kontrol', teknisyen:'Hasan Yıldız', sure:'1s 15dk', parcalar:[{kod:'KMP-AF-07',ad:'Hava Filtresi',adet:1,birim:'Adet'}], foto:false },
+    { tarih:'01.03.2025', tip:'Revizyon', aciklama:'Kompresör vida revizyon kiti değişimi', teknisyen:'Servis Ekibi', sure:'6s', parcalar:[{kod:'KMP-VK-37',ad:'Vida Revizyon Kiti GA-37',adet:1,birim:'Set'}], foto:true },
+    { tarih:'12.01.2025', tip:'Montaj', aciklama:'Yedek kompresör devreye alındı', teknisyen:'Ali Demir', sure:'2s 30dk', parcalar:[], foto:false },
+  ]
+};
+
+const PARCALAR_DATA = {
+  'CNC-001': [
+    { kod:'YG-001', ad:'Spindle Yağı 5W-30', tur:'Yağ/Sıvı', birim:'Lt', stok:8, minStok:4, tedarik:'İçer Endüstri', ikon:'🛢️' },
+    { kod:'FL-007', ad:'Yağ Filtresi CNC-F07', tur:'Filtre', birim:'Adet', stok:3, minStok:2, tedarik:'Fanuc TR', ikon:'🔩' },
+    { kod:'MT-X44', ad:'X Ekseni Step Motor', tur:'Elektrik/Elektronik', birim:'Adet', stok:1, minStok:1, tedarik:'DMG Mori', ikon:'⚡' },
+    { kod:'KYS-12', ad:'Soğutma Suyu Konsantresi', tur:'Yağ/Sıvı', birim:'Lt', stok:2, minStok:5, tedarik:'Blaser Swisslube', ikon:'💧' },
+    { kod:'KPN-03', ad:'Motor Kaplini CNC-03', tur:'Mekanik', birim:'Adet', stok:0, minStok:1, tedarik:'DMG Mori', ikon:'⚙️' },
+    { kod:'INS-55', ad:'Insert Takım Seti CNMG', tur:'Takım', birim:'Kutu', stok:12, minStok:5, tedarik:'Sandvik Coromant', ikon:'🔪' },
+  ],
+  'HYD-042': [
+    { kod:'HY-OIL-46', ad:'Hidrolik Yağ ISO VG46', tur:'Yağ/Sıvı', birim:'Lt', stok:40, minStok:20, tedarik:'Shell TR', ikon:'🛢️' },
+    { kod:'HY-FLT-02', ad:'Hidrolik Filtre 10µ', tur:'Filtre', birim:'Adet', stok:4, minStok:2, tedarik:'Parker', ikon:'🔩' },
+    { kod:'HR-HP-16', ad:'HP Hortum 16mm (1 metre)', tur:'Hortum', birim:'Metre', stok:3, minStok:5, tedarik:'Parker TR', ikon:'🌀' },
+    { kod:'RK-2P', ad:'Hidrolik Rakor 2 Parmak', tur:'Bağlantı', birim:'Adet', stok:10, minStok:6, tedarik:'Parker TR', ikon:'🔗' },
+    { kod:'SL-250', ad:'250T Pres Contası', tur:'Conta/Keçe', birim:'Set', stok:2, minStok:1, tedarik:'Bosch Rexroth', ikon:'⭕' },
+  ],
+  'KOM-017': [
+    { kod:'KMP-AF-07', ad:'Hava Filtresi GA-37', tur:'Filtre', birim:'Adet', stok:2, minStok:1, tedarik:'Atlas Copco', ikon:'🌬️' },
+    { kod:'KMP-VK-37', ad:'Vida Revizyon Kiti GA-37', tur:'Revizyon Kiti', birim:'Set', stok:1, minStok:1, tedarik:'Atlas Copco', ikon:'🔧' },
+    { kod:'KMP-OIL-37', ad:'Roto Inject Yağı 4Lt', tur:'Yağ/Sıvı', birim:'Lt', stok:8, minStok:4, tedarik:'Atlas Copco', ikon:'🛢️' },
+    { kod:'KMP-BELT', ad:'V Kayışı Seti GA-37', tur:'Mekanik', birim:'Set', stok:1, minStok:1, tedarik:'Atlas Copco', ikon:'〰️' },
+  ]
+};
+
+// ── STATE ──────────────────────────────────────
+let aktifEkipman = null;
+let aktifPeriod = 'gunluk';
+let checkedItems = {};
+let secilenOncelik = null;
+
+// ── QR OKU ──────────────────────────────────────
+function qrOku(kod) {
+  aktifEkipman = kod;
+  checkedItems = {};
+  secilenOncelik = null;
+
+  const eq = EKIPMANLAR[kod];
+  document.getElementById('ep-name').textContent = eq.ad;
+  document.getElementById('ep-meta').textContent = `${eq.barkod} · ${eq.bolum} · ${eq.konum}`;
+  
+  const statusEl = document.getElementById('ep-status');
+  statusEl.textContent = eq.durum;
+  statusEl.className = 'eq-status';
+  if (eq.durum === 'AKTİF') statusEl.classList.add('aktif');
+  else if (eq.durum === 'ARIZALI') statusEl.classList.add('arizali');
+  else statusEl.classList.add('bakimda');
+
+  document.getElementById('qr-splash').style.display = 'none';
+  document.getElementById('ekipman-panel').style.display = 'block';
+
+  goTab('checklist');
+  renderChecklist('gunluk');
+  renderGecmis();
+  renderParcalar();
+}
+
+function geriDon() {
+  document.getElementById('ekipman-panel').style.display = 'none';
+  document.getElementById('qr-splash').style.display = 'flex';
+}
+
+// ── TABS ──────────────────────────────────────
+function goTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('content-'+tab).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── CHECKLİST ──────────────────────────────────
+function periyotSec(btn, period) {
+  document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  aktifPeriod = period;
+  checkedItems = {};
+  renderChecklist(period);
+}
+
+function renderChecklist(period) {
+  const items = CHECKLISTS[period];
+  const titles = { gunluk:'GÜNLÜK KONTROLLER', haftalik:'HAFTALIK KONTROLLER', aylik:'AYLIK KONTROLLER', is_emri:'İŞ EMRİ KONTROL ADIMLARI' };
+  document.getElementById('checklist-baslik').textContent = titles[period];
+
+  const container = document.getElementById('checklist-items');
+  container.innerHTML = items.map(item => `
+    <div class="check-item ${item.uyari ? 'warn-item' : ''}" onclick="toggleCheck('${item.id}')" id="ci-${item.id}">
+      <div class="check-box" id="cb-${item.id}"></div>
+      <div class="check-text">
+        <div class="check-title">${item.baslik}</div>
+        <div class="check-desc">${item.aciklama}</div>
+        ${item.uyari ? `<div class="check-warn">⚠️ ${item.uyari}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+  updateProgress();
+}
+
+function toggleCheck(id) {
+  checkedItems[id] = !checkedItems[id];
+  const item = document.getElementById('ci-'+id);
+  const box  = document.getElementById('cb-'+id);
+  if (checkedItems[id]) {
+    item.classList.add('checked');
+    box.textContent = '✓';
+  } else {
+    item.classList.remove('checked');
+    box.textContent = '';
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = CHECKLISTS[aktifPeriod].length;
+  const done  = Object.values(checkedItems).filter(Boolean).length;
+  const pct   = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('progress-text').textContent = `${done} / ${total} tamamlandı`;
+  document.getElementById('progress-pct').textContent  = `%${pct}`;
+  document.getElementById('progress-fill').style.width = `${pct}%`;
+  document.getElementById('btn-tamamla').disabled = done < total;
+}
+
+function checklistTamamla() {
+  showToast('✅ Kontrol listesi kaydedildi!','ok');
+  setTimeout(()=>{ checkedItems={}; renderChecklist(aktifPeriod); },1500);
+}
+
+// ── ARIZA ──────────────────────────────────────
+function oncelikSec(btn, seviye) {
+  document.querySelectorAll('.onc-btn').forEach(b => b.className='onc-btn');
+  btn.classList.add('selected-'+seviye);
+  secilenOncelik = seviye;
+}
+
+function fotoEkle(input) {
+  const preview = document.getElementById('foto-preview');
+  [...input.files].forEach(f => {
+    const r = new FileReader();
+    r.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'foto-thumb';
+      preview.appendChild(img);
+    };
+    r.readAsDataURL(f);
+  });
+}
+
+function arizaBildir() {
+  const tur  = document.getElementById('ar-tur').value;
+  const acik = document.getElementById('ar-aciklama').value.trim();
+  const opr  = document.getElementById('ar-operator').value.trim();
+  if (!tur)    { showToast('⚠️ Arıza türü seçin','err'); return; }
+  if (!acik)   { showToast('⚠️ Açıklama girin','err'); return; }
+  if (!opr)    { showToast('⚠️ Operatör adı girin','err'); return; }
+  if (!secilenOncelik) { showToast('⚠️ Öncelik seçin','err'); return; }
+  const ie = 'IE-' + Date.now().toString().slice(-6);
+  showToast(`🚨 Arıza bildirildi! İş Emri: ${ie}`,'err');
+  setTimeout(()=>{
+    document.getElementById('ar-tur').value = '';
+    document.getElementById('ar-aciklama').value = '';
+    document.getElementById('ar-operator').value = '';
+    document.getElementById('ar-notlar').value = '';
+    document.getElementById('foto-preview').innerHTML = '';
+    document.querySelectorAll('.onc-btn').forEach(b=>b.className='onc-btn');
+    secilenOncelik = null;
+  }, 1500);
+}
+
+// ── GEÇMİŞ ──────────────────────────────────────
+function renderGecmis(filter='', tipFilter='') {
+  const list = GECMIS_DATA[aktifEkipman] || [];
+  const container = document.getElementById('gecmis-list');
+  const tipKls = { 'Arıza':'tip-ariza','Bakım':'tip-bakim','Revizyon':'tip-revizyon','Montaj':'tip-montaj','Planlı':'tip-planli' };
+  const badgeKls = { 'Arıza':'b-ariza','Bakım':'b-bakim','Revizyon':'b-revizyon','Montaj':'b-montaj','Planlı':'b-planli' };
+
+  const filtered = list.filter(g => {
+    const ara = filter.toLowerCase();
+    const match = !ara || g.aciklama.toLowerCase().includes(ara) || g.teknisyen.toLowerCase().includes(ara) || g.tarih.includes(ara);
+    const tipMatch = !tipFilter || g.tip === tipFilter;
+    return match && tipMatch;
+  });
+
+  if (!filtered.length) { container.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px;">Kayıt bulunamadı</div>'; return; }
+
+  container.innerHTML = filtered.map((g,i) => {
+    const parcaHTML = g.parcalar.length
+      ? `<table class="parca-table"><thead><tr><th>Parça Kodu</th><th>Parça Adı</th><th>Adet</th><th>Birim</th></tr></thead><tbody>${g.parcalar.map(p=>`<tr><td><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#c07800;">${p.kod}</span></td><td>${p.ad}</td><td>${p.adet}</td><td>${p.birim}</td></tr>`).join('')}</tbody></table>`
+      : '<div style="font-size:13px;color:var(--muted)">Bu kayıtta kullanılan parça yok.</div>';
+    return `
+      <div class="gecmis-item ${tipKls[g.tip]||''}">
+        <div class="gecmis-top">
+          <div>
+            <span class="badge ${badgeKls[g.tip]||''}">${g.tip}</span>
+            <span class="gecmis-tarih" style="margin-left:8px">${g.tarih}</span>
+          </div>
+          ${g.foto ? '<span style="font-size:13px;color:var(--blue)">📷 Fotoğraf</span>' : ''}
+        </div>
+        <div class="gecmis-aciklama">${g.aciklama}</div>
+        <div class="gecmis-detail">
+          <span>👷 ${g.teknisyen}</span>
+          <span>⏱️ ${g.sure}</span>
+          ${g.parcalar.length ? `<span>🔩 ${g.parcalar.length} parça</span>` : ''}
+        </div>
+        <button class="expand-btn" onclick="toggleExpand(${i})">Parçaları Göster ▾</button>
+        <div class="gecmis-expand" id="expand-${i}">
+          ${parcaHTML}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleExpand(i) {
+  const el = document.getElementById('expand-'+i);
+  el.classList.toggle('open');
+}
+
+function gecmisFiltrele() {
+  renderGecmis(
+    document.getElementById('gecmis-ara').value,
+    document.getElementById('gecmis-tip').value
+  );
+}
+
+// ── YEDEK PARÇALAR ──────────────────────────────
+function renderParcalar(filter='') {
+  const list = PARCALAR_DATA[aktifEkipman] || [];
+  const container = document.getElementById('yp-list');
+  const filtered = list.filter(p => !filter || p.ad.toLowerCase().includes(filter.toLowerCase()) || p.kod.toLowerCase().includes(filter.toLowerCase()));
+
+  if (!filtered.length) { container.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)">Parça bulunamadı</div>'; return; }
+
+  container.innerHTML = filtered.map(p => {
+    const stokOk = p.stok >= p.minStok * 1.5;
+    const stokWarn = p.stok > 0 && p.stok < p.minStok;
+    const stokOut = p.stok === 0;
+    const stokClass = stokOut ? 'out' : stokWarn ? 'warn' : 'ok';
+    const stokLabel = stokOut ? 'STOK YOK' : stokWarn ? 'DÜŞÜK STOK' : 'YETERLİ';
+    return `
+      <div class="yp-item">
+        <div class="yp-ikon">${p.ikon}</div>
+        <div class="yp-info">
+          <div class="yp-name">${p.ad}</div>
+          <div class="yp-kod">${p.kod} · ${p.tur}</div>
+          <div class="yp-meta">Min: ${p.minStok} ${p.birim} · ${p.tedarik}</div>
+        </div>
+        <div class="yp-stok">
+          <div class="yp-adet ${stokClass}">${p.stok}</div>
+          <div class="yp-stok-label ${stokClass}">${p.birim}</div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.5px;margin-top:2px;color:${stokOut?'var(--danger)':stokWarn?'var(--warn)':'var(--ok)'}">${stokLabel}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function ypFiltrele() {
+  renderParcalar(document.getElementById('yp-ara').value);
+}
+
+// ── TOAST ──────────────────────────────────────
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(()=>{ t.className='toast'; }, 3000);
+}
+</script>
+</body>
+</html>
