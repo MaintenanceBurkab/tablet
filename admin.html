@@ -420,17 +420,17 @@ tbody td{padding:11px 12px;vertical-align:middle}
             <div class="card-head"><div class="card-head-title"><span class="dot"></span>1. Cihaz Kimlik Bilgileri</div></div>
             <div class="card-body">
               <div class="fg fg-2">
-                <div class="field"><label>Ekipman Adı <span class="req">*</span></label><input type="text" id="ne-ad" placeholder="Örn: Eksantrik Pres" oninput="ekipmanKodOner()"></div>
+                <div class="field"><label>Ekipman Adı <span class="req">*</span></label><input type="text" id="ne-ad" placeholder="Örn: MANUEL PRES" oninput="ekipmanKodOner()"></div>
                 <div class="field"><label>Ekipman Kodu <span class="req">*</span></label><input type="text" id="ne-kod" placeholder="BRK-PRS-085" style="font-family:'IBM Plex Mono',monospace"></div>
               </div>
               <div class="fg fg-3">
                 <div class="field"><label>Ekipman Türü <span class="req">*</span></label>
                   <select id="ne-tur">
                     <option value="">— Seçin —</option>
-                    <option>CNC Tezgah</option><option>Hidrolik Pres</option><option>Eksantrik Pres</option>
-                    <option>Kompresör</option><option>Konveyör</option><option>Robot Kolu</option>
-                    <option>Kaynak Makinesi</option><option>Soğutma Sistemi</option><option>Vinç / Forklift</option>
-                    <option>Pompa</option><option>Motor / Redüktör</option><option>Diğer</option>
+                    <option>TEST MASASI</option><option>Hidrolik Pres</option><option>MANUEL PRES</option>
+                    <option>KOMPRESÖR</option><option>OTOMATİK KESME KRİMPLEME MAKİNESI</option><option>KABLO KESME MAKİNESİ</option>
+                    <option>KESİNTİSİZ GÜÇ KAYNAĞI</option><option>POLYAMİD KESME MAKİNESİ</option><option>VİNÇ / FORKLİFT</option>
+                    <option>MAKARON KESME MAKİNESİ</option><option>BANTLAMA MAKİNESİ</option><option>ULTRASONİK KAYNAK MAKİNESİ</option><option>JENERATÖR</option><option>PNÖMATİK VİDALAMA</option><option>KABLO SIYIRMA MAKİNESİ</option><option>Diğer</option>
                   </select></div>
                 <div class="field"><label>Marka / Model</label><input type="text" id="ne-marka" placeholder="Örn: Fanuc / DMG Mori"></div>
                 <div class="field"><label>Seri No</label><input type="text" id="ne-serino" placeholder="Seri numarası"></div>
@@ -807,7 +807,7 @@ function syncTablet(ekipmanlar){
 
 // ── VARSAYILAN VERİLER ────────────────────────
 function defaultEkipmanlar(){ return [
-  { id:'eq-1', tabletKod:'CNC-001', ad:'CNC Torna Tezgahı', kod:'BRK-CNC-001', bolum:'Üretim Hattı A', tur:'CNC Tezgah', marka:'Fanuc / DMG Mori', serino:'DMG-2019-04471', devreye:'2019-03-12', garanti:'2022-03-12', durum:'AKTİF', kapasite:'18.5 kW', periyot:'30 gün', konum:'Hat A - İstasyon 3', bakimci:'Ferhat Oktay', not:'Ana üretim CNC', sonBakim:'14.03.2025', checklists: buildDefaultCL() },
+  { id:'eq-1', tabletKod:'CNC-001', ad:'CNC Torna Tezgahı', kod:'BRK-CNC-001', bolum:'Üretim Hattı A', tur:'TEST MASASI', marka:'Fanuc / DMG Mori', serino:'DMG-2019-04471', devreye:'2019-03-12', garanti:'2022-03-12', durum:'AKTİF', kapasite:'18.5 kW', periyot:'30 gün', konum:'Hat A - İstasyon 3', bakimci:'Ferhat Oktay', not:'Ana üretim CNC', sonBakim:'14.03.2025', checklists: buildDefaultCL() },
   { id:'eq-2', tabletKod:'HYD-042', ad:'Hidrolik Pres', kod:'BRK-HYD-042', bolum:'Pres Bölümü', tur:'Hidrolik Pres', marka:'Bosch Rexroth', serino:'BRT-HYD-7720', devreye:'2021-07-05', garanti:'2024-07-05', durum:'BAKIMDA', kapasite:'250 ton', periyot:'14 gün', konum:'Pres Sahası B-12', bakimci:'Sunay Avcı', not:'', sonBakim:'18.03.2025', checklists: buildDefaultCL() },
   { id:'eq-3', tabletKod:'KOM-017', ad:'Kompresör Ünitesi', kod:'BRK-KOM-017', bolum:'Makine Parkı', tur:'Vida Kompresör', marka:'Atlas Copco GA-37', serino:'AC-GA37-20210892', devreye:'2020-01-20', garanti:'2023-01-20', durum:'AKTİF', kapasite:'37 kW / 7 bar', periyot:'7 gün', konum:'Makine Dairesi K-2', bakimci:'Enes Balkan', not:'', sonBakim:'20.03.2025', checklists: buildDefaultCL() },
 ];}
